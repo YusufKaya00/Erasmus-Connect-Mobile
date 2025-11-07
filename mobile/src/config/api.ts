@@ -2,7 +2,14 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Backend API URL'inizi buraya yazın
-export const API_URL = 'http://localhost:4000/api';
+// Telefondan veya emulatordan erişim için bilgisayarın IP adresini kullan
+export const API_URL = 'http://10.61.0.244:4000/api/v1';
+
+// VEYA Android Emulator kullanıyorsan:
+// export const API_URL = 'http://10.0.2.2:4000/api/v1';
+
+// VEYA Web için:
+// export const API_URL = 'http://localhost:4000/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,
