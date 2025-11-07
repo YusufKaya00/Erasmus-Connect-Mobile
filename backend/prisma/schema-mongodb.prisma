@@ -1,0 +1,355 @@
+// Erasmus Connect - MongoDB Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// User & Authentication
+// ============================================
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  email         String    @unique
+  password      String?   // Optional for OAuth users
+  role          UserRole  @default(STUDENT)
+  isActive      Boolean   @default(true)
+  isVerified    Boolean   @default(false)
+  
+  // Email Verification
+  verificationToken       String?
+  verificationTokenExpiry DateTime?
+  
+  // OAuth
+  provider      String?   // "local", "google", etc.
+  providerId    String?   // OAuth provider's user ID
+  
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  posts         Post[]
+  likes         Like[]
+  ratings       Rating[]
+  matchesFrom   Match[]   @relation("UserFromMatches")
+  matchesTo     Match[]   @relation("UserToMatches")
+  notifications Notification[]
+  sessions      Session[]
+  routes        Route[]
+  routeComments RouteComment[]
+  comments      Comment[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+  MODERATOR
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  refreshToken String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+
+// ============================================
+// Country & Geography
+// ============================================
+
+model Country {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  code        String   @unique
+  continent   String
+  latitude    Float
+  longitude   Float
+  flag        String?
+  timezone    String?
+  currency    String?
+  languages   String[]
+  description String?
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  posts       Post[]
+
+  @@map("countries")
+}
+
+// ============================================
+// Posts & Content
+// ============================================
+
+model Post {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  authorId    String       @db.ObjectId
+  countryId   String       @db.ObjectId
+  categoryId  String       @db.ObjectId
+  
+  title       String
+  content     String
+  images      String[]
+  
+  // Stats
+  viewCount   Int          @default(0)
+  likeCount   Int          @default(0)
+  avgRating   Float?       @default(0)
+
+  // Location (Optional)
+  locationPlaceId   String?  // Google Place ID
+  locationName      String?  // Mekan adı (örn: "Eiffel Kulesi")
+  locationAddress   String?  // Mekanın tam adresi
+  locationLat       Float?   // Enlem koordinatı
+  locationLng       Float?   // Boylam koordinatı
+  
+  isPublished Boolean      @default(true)
+  isPinned    Boolean      @default(false)
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  author      User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  country     Country      @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  category    Category     @relation(fields: [categoryId], references: [id])
+  likes       Like[]
+  ratings     Rating[]
+  comments    Comment[]
+
+  @@map("posts")
+}
+
+
+
+model Category {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  slug        String   @unique
+  name        String
+  nameEn      String
+  description String?
+  icon        String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  posts       Post[]
+
+  @@map("categories")
+}
+
+model Like {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  postId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("likes")
+}
+
+model Rating {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  postId    String   @db.ObjectId
+  value     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("ratings")
+}
+
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  postId    String   @db.ObjectId
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+// ============================================
+// Matching System
+// ============================================
+
+model Match {
+  id                  String      @id @default(auto()) @map("_id") @db.ObjectId
+  userFromId          String      @db.ObjectId
+  userToId            String      @db.ObjectId
+  
+  // Matching Score
+  matchScore          Float
+  scoreBreakdown      Json?
+  
+  // Status
+  status              MatchStatus @default(PENDING)
+  
+  // Contact Sharing
+  contactSharedByFrom Boolean     @default(false)
+  contactSharedByTo   Boolean     @default(false)
+  contactSharedAt     DateTime?
+  
+  // Messages
+  lastMessageAt       DateTime?
+  
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  // Relations
+  userFrom            User        @relation("UserFromMatches", fields: [userFromId], references: [id], onDelete: Cascade)
+  userTo              User        @relation("UserToMatches", fields: [userToId], references: [id], onDelete: Cascade)
+
+  @@unique([userFromId, userToId])
+  @@map("matches")
+}
+
+enum MatchStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+// ============================================
+// Notifications
+// ============================================
+
+model Notification {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String           @db.ObjectId
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  // Relations
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  MATCH_FOUND
+  MATCH_ACCEPTED
+  NEW_MESSAGE
+  POST_LIKED
+  POST_RATED
+  PROFILE_VIEWED
+  SYSTEM
+}
+
+// ============================================
+// Analytics & Logs
+// ============================================
+
+model ActivityLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?  @db.ObjectId
+  action    String
+  entityType String?
+  entityId  String?
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@map("activity_logs")
+}
+
+// ============================================
+// Travel Routes
+// ============================================
+
+model Route {
+  id                String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String          @db.ObjectId
+  
+  title             String
+  description       String?
+  
+  // Route Details
+  startLocation     String
+  endLocation       String
+  startCoordinates  Json            // { lat, lng }
+  endCoordinates    Json            // { lat, lng }
+  
+  // Google Maps Integration
+  googleMapsUrl     String?
+  directionsData    Json?           // Google Directions API response
+  
+  // Stats
+  viewCount         Int             @default(0)
+  likeCount         Int             @default(0)
+  
+  isPublic          Boolean         @default(true)
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  // Relations
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments          RouteComment[]
+
+  // Indexes for performance
+  @@index([userId])
+  @@index([createdAt])
+  @@index([isPublic, createdAt])
+  @@map("routes")
+}
+
+model RouteComment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  routeId   String   @db.ObjectId
+  userId    String   @db.ObjectId
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  route     Route    @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes for performance
+  @@index([routeId, createdAt])
+  @@index([userId])
+  @@map("route_comments")
+}
+
