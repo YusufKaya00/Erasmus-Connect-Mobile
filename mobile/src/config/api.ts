@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Backend API URL'inizi buraya yazın
 // Telefondan veya emulatordan erişim için bilgisayarın IP adresini kullan
-export const API_URL = 'http://10.61.0.244:4000/api/v1';
+export const API_URL = 'http://10.159.9.123:4000/api/v1';
 
 // VEYA Android Emulator kullanıyorsan:
 // export const API_URL = 'http://10.0.2.2:4000/api/v1';

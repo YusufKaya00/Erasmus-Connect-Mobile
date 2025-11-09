@@ -13,16 +13,22 @@ export class ProfileServiceSupabase {
    * Get profile by user ID
    */
   async getProfileByUserId(userId: string) {
+    console.log('🔍 [SUPABASE] Querying profile for userId:', userId);
+    
     const { data, error } = await this.supabase
       .from('profiles')
       .select('*')
       .eq('user_id', userId)
       .single();
 
+    console.log('🔍 [SUPABASE] Query result - data:', data ? 'EXISTS' : 'NULL', 'error:', error?.code, error?.message);
+
     if (error) {
       if (error.code === 'PGRST116') {
+        console.log('❌ [SUPABASE] Profile not found (PGRST116) for userId:', userId);
         return null; // Profile not found
       }
+      console.error('❌ [SUPABASE] Error fetching profile:', error);
       throw new Error(`Failed to fetch profile: ${error.message}`);
     }
 

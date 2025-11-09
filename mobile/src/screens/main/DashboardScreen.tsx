@@ -38,28 +38,28 @@ const DashboardScreen = () => {
   const stats = [
     {
       icon: 'people',
-      label: 'Eşleşmeler',
+      label: 'My Matches',
       value: '12',
       color: colors.secondary[600],
       bgColor: colors.secondary[50],
     },
     {
       icon: 'newspaper',
-      label: 'Gönderilerim',
+      label: 'My Posts',
       value: '5',
       color: colors.primary[600],
       bgColor: colors.primary[50],
     },
     {
       icon: 'eye',
-      label: 'Profil Görüntüleme',
+      label: 'Profile Views',
       value: '45',
       color: colors.success[600],
       bgColor: colors.success[50],
     },
     {
       icon: 'location',
-      label: 'Hedef',
+      label: 'Destination',
       value: profile?.destinationCountry?.name || '-',
       color: colors.warning[600],
       bgColor: colors.warning[50],
@@ -67,10 +67,10 @@ const DashboardScreen = () => {
   ];
 
   const quickActions = [
-    { icon: 'person', label: 'Profili Düzenle', color: colors.primary[600] },
-    { icon: 'people', label: 'Eşleşmeleri Gör', color: colors.secondary[600] },
-    { icon: 'globe', label: 'Ülkeleri Keşfet', color: colors.success[600] },
-    { icon: 'create', label: 'Gönderi Oluştur', color: colors.warning[600] },
+    { icon: 'person', label: 'Edit Profile', color: colors.primary[600] },
+    { icon: 'people', label: 'View Matches', color: colors.secondary[600] },
+    { icon: 'globe', label: 'Explore Countries', color: colors.success[600] },
+    { icon: 'create', label: 'Create Post', color: colors.warning[600] },
   ];
 
   if (loading) {
@@ -91,9 +91,9 @@ const DashboardScreen = () => {
           {/* Header */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.greeting}>Merhaba! 👋</Text>
+              <Text style={styles.greeting}>Welcome! 👋</Text>
               <Text style={styles.userName}>
-                {profile?.firstName || user?.firstName || 'Öğrenci'}
+                {profile?.firstName || user?.firstName || 'Student'}
               </Text>
             </View>
             <View style={styles.avatarContainer}>
@@ -120,7 +120,7 @@ const DashboardScreen = () => {
 
           {/* Quick Actions */}
           <Card style={styles.card}>
-            <Text style={styles.sectionTitle}>Hızlı Erişim</Text>
+            <Text style={styles.sectionTitle}>Quick Actions</Text>
             <View style={styles.actionsGrid}>
               {quickActions.map((action, index) => (
                 <TouchableOpacity
@@ -143,27 +143,27 @@ const DashboardScreen = () => {
 
           {/* Recent Activity */}
           <Card style={styles.card}>
-            <Text style={styles.sectionTitle}>Son Aktiviteler</Text>
+            <Text style={styles.sectionTitle}>Recent Activity</Text>
             <View style={styles.activityList}>
               <View style={styles.activityItem}>
                 <View style={[styles.activityDot, { backgroundColor: colors.primary[600] }]} />
                 <View style={styles.activityContent}>
-                  <Text style={styles.activityText}>Yeni eşleşme önerisi</Text>
-                  <Text style={styles.activityTime}>2 saat önce</Text>
+                  <Text style={styles.activityText}>New match suggestion</Text>
+                  <Text style={styles.activityTime}>2 hours ago</Text>
                 </View>
               </View>
               <View style={styles.activityItem}>
                 <View style={[styles.activityDot, { backgroundColor: colors.success[600] }]} />
                 <View style={styles.activityContent}>
-                  <Text style={styles.activityText}>Profiliniz görüntülendi</Text>
-                  <Text style={styles.activityTime}>5 saat önce</Text>
+                  <Text style={styles.activityText}>Profile viewed</Text>
+                  <Text style={styles.activityTime}>5 hours ago</Text>
                 </View>
               </View>
               <View style={styles.activityItem}>
                 <View style={[styles.activityDot, { backgroundColor: colors.secondary[600] }]} />
                 <View style={styles.activityContent}>
-                  <Text style={styles.activityText}>Gönderiniz beğenildi</Text>
-                  <Text style={styles.activityTime}>1 gün önce</Text>
+                  <Text style={styles.activityText}>Post liked</Text>
+                  <Text style={styles.activityTime}>1 day ago</Text>
                 </View>
               </View>
             </View>
@@ -171,7 +171,7 @@ const DashboardScreen = () => {
 
           {/* Profile Completion */}
           <Card style={[styles.card, { backgroundColor: colors.success[50] }]}>
-            <Text style={styles.sectionTitle}>Profil Tamamlama</Text>
+            <Text style={styles.sectionTitle}>Profile Completion</Text>
             <View style={styles.progressContainer}>
               <View style={styles.progressBar}>
                 <View style={[styles.progressFill, { width: '75%' }]} />
@@ -179,7 +179,7 @@ const DashboardScreen = () => {
               <Text style={styles.progressText}>75%</Text>
             </View>
             <Text style={styles.progressHint}>
-              Profilinizi tamamlayarak daha fazla eşleşme alın!
+              Complete your profile to get more matches!
             </Text>
           </Card>
         </ScrollView>

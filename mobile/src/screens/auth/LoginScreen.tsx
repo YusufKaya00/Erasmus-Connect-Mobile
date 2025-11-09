@@ -39,7 +39,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Hata', 'Lütfen tüm alanları doldurun');
+      Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
@@ -47,15 +47,26 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     try {
       const authData = await authService.login({ email, password });
       
-      // Profil bilgisini çek
-      const profile = await profileService.getMe();
+      // Profil bilgisini çek (profil yoksa null olur, hata vermez)
+      let profile = null;
+      try {
+        profile = await profileService.getMe();
+      } catch (profileError: any) {
+        // Profil bulunamadıysa (404), null olarak devam et
+        if (profileError.response?.status === 404) {
+          console.log('⚠️ Profile not found, user needs to complete profile');
+        } else {
+          // Başka bir hata varsa logla ama devam et
+          console.error('Error fetching profile:', profileError);
+        }
+      }
       
       setAuth(authData.user, profile);
-      Alert.alert('Başarılı', 'Giriş yapıldı!');
+      Alert.alert('Success', 'Logged in successfully!');
     } catch (error: any) {
       Alert.alert(
-        'Hata',
-        error.response?.data?.error?.message || 'Giriş yapılamadı'
+        'Error',
+        error.response?.data?.error?.message || 'Login failed'
       );
     } finally {
       setLoading(false);
@@ -76,14 +87,14 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 <Ionicons name="globe" size={60} color={colors.primary[600]} />
               </View>
               <Text style={styles.title}>Erasmus Connect</Text>
-              <Text style={styles.subtitle}>Hesabınıza giriş yapın</Text>
+              <Text style={styles.subtitle}>Sign in to your account</Text>
             </View>
 
             {/* Login Card */}
             <Card style={styles.card}>
               <Input
-                label="E-posta"
-                placeholder="ornek@email.com"
+                label="Email"
+                placeholder="example@email.com"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -92,7 +103,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
               <View style={styles.passwordContainer}>
                 <Input
-                  label="Şifre"
+                  label="Password"
                   placeholder="••••••••"
                   value={password}
                   onChangeText={setPassword}
@@ -111,7 +122,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
               </View>
 
               <Button
-                title="Giriş Yap"
+                title="Sign In"
                 onPress={handleLogin}
                 loading={loading}
                 style={styles.loginButton}
@@ -119,7 +130,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
               <View style={styles.divider}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>VEYA</Text>
+                <Text style={styles.dividerText}>OR</Text>
                 <View style={styles.dividerLine} />
               </View>
 
@@ -128,17 +139,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 onPress={() => navigation.navigate('Register')}
               >
                 <Text style={styles.registerText}>
-                  Hesabınız yok mu?{' '}
-                  <Text style={styles.registerTextBold}>Kayıt Olun</Text>
+                  Don't have an account?{' '}
+                  <Text style={styles.registerTextBold}>Sign Up</Text>
                 </Text>
               </TouchableOpacity>
             </Card>
 
             {/* Demo Credentials */}
             <Card style={styles.demoCard}>
-              <Text style={styles.demoTitle}>🎯 Demo Hesap</Text>
-              <Text style={styles.demoText}>E-posta: ahmet.yilmaz@example.com</Text>
-              <Text style={styles.demoText}>Şifre: demo123</Text>
+              <Text style={styles.demoTitle}>🎯 Demo Account</Text>
+              <Text style={styles.demoText}>Email: ahmet.yilmaz@example.com</Text>
+              <Text style={styles.demoText}>Password: demo123</Text>
             </Card>
           </ScrollView>
         </KeyboardAvoidingView>

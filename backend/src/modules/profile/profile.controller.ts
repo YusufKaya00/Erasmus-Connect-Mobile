@@ -7,25 +7,33 @@ export class ProfileController {
     try {
       const userId = req.user?.id;
 
+      console.log('🔍 [GET PROFILE] Request received');
+      console.log('🔍 [GET PROFILE] User from token:', req.user);
+      console.log('🔍 [GET PROFILE] UserId:', userId);
+
       if (!userId) {
+        console.error('❌ [GET PROFILE] No userId found');
         return res.status(401).json({
           success: false,
           error: { message: 'User not authenticated' },
         });
       }
 
-      console.log('🔍 Fetching profile for user:', userId);
+      console.log('🔍 [GET PROFILE] Fetching profile for user:', userId);
 
       const profile = await profileService.getProfileByUserId(userId);
 
+      console.log('🔍 [GET PROFILE] Profile query result:', profile ? 'FOUND' : 'NOT FOUND');
+
       if (!profile) {
+        console.error('❌ [GET PROFILE] Profile not found for userId:', userId);
         return res.status(404).json({
           success: false,
           error: { message: 'Profile not found' },
         });
       }
 
-      console.log('✅ Profile found:', profile.id);
+      console.log('✅ [GET PROFILE] Profile found:', profile.id);
 
       res.json({
         success: true,

@@ -1,6 +1,6 @@
 import api from '../config/api';
 
-export type MatchCategory = 'ROOMMATE' | 'MENTOR' | 'COMMUNICATION';
+export type MatchCategory = 'ROOMMATE' | 'MENTOR' | 'COMMUNICATION' | 'LIKED';
 
 class MatchService {
   async getMatches(category: MatchCategory) {

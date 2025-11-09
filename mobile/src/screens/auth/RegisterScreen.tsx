@@ -44,12 +44,12 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleRegister = async () => {
     if (!firstName || !lastName || !email || !password) {
-      Alert.alert('Hata', 'Lütfen tüm alanları doldurun');
+      Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     if (password.length < 8) {
-      Alert.alert('Hata', 'Şifre en az 8 karakter olmalıdır');
+      Alert.alert('Error', 'Password must be at least 8 characters');
       return;
     }
 
@@ -62,18 +62,29 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         lastName,
       });
 
-      // Profil bilgisini çek
-      const profile = await profileService.getMe();
+      // Profil bilgisini çek (profil yoksa null olur, hata vermez)
+      let profile = null;
+      try {
+        profile = await profileService.getMe();
+      } catch (profileError: any) {
+        // Profil bulunamadıysa (404), null olarak devam et
+        if (profileError.response?.status === 404) {
+          console.log('⚠️ Profile not found, user needs to complete profile');
+        } else {
+          // Başka bir hata varsa logla ama devam et
+          console.error('Error fetching profile:', profileError);
+        }
+      }
 
       setAuth(authData.user, profile);
       Alert.alert(
-        'Başarılı',
-        'Kayıt başarılı! Lütfen email adresinizi doğrulayın.'
+        'Success',
+        'Registration successful! Please verify your email.'
       );
     } catch (error: any) {
       Alert.alert(
-        'Hata',
-        error.response?.data?.error?.message || 'Kayıt oluşturulamadı'
+        'Error',
+        error.response?.data?.error?.message || 'Registration failed'
       );
     } finally {
       setLoading(false);
@@ -97,22 +108,22 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 <Ionicons name="globe" size={60} color={colors.primary[600]} />
               </View>
               <Text style={styles.title}>Erasmus Connect</Text>
-              <Text style={styles.subtitle}>Yeni hesap oluşturun</Text>
+              <Text style={styles.subtitle}>Create your new account</Text>
             </View>
 
             {/* Register Card */}
             <Card style={styles.card}>
               <View style={styles.row}>
                 <Input
-                  label="Ad"
-                  placeholder="Ahmet"
+                  label="First Name"
+                  placeholder="John"
                   value={firstName}
                   onChangeText={setFirstName}
                   containerStyle={styles.halfInput}
                 />
                 <Input
-                  label="Soyad"
-                  placeholder="Yılmaz"
+                  label="Last Name"
+                  placeholder="Doe"
                   value={lastName}
                   onChangeText={setLastName}
                   containerStyle={styles.halfInput}
@@ -120,8 +131,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               </View>
 
               <Input
-                label="E-posta"
-                placeholder="ornek@email.com"
+                label="Email"
+                placeholder="example@email.com"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -130,8 +141,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
               <View style={styles.passwordContainer}>
                 <Input
-                  label="Şifre"
-                  placeholder="En az 8 karakter"
+                  label="Password"
+                  placeholder="At least 8 characters"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -149,11 +160,11 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               </View>
 
               <Text style={styles.passwordHint}>
-                Şifre en az 8 karakter içermelidir
+                Password must be at least 8 characters
               </Text>
 
               <Button
-                title="Kayıt Ol"
+                title="Sign Up"
                 onPress={handleRegister}
                 loading={loading}
                 style={styles.registerButton}
@@ -161,7 +172,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
               <View style={styles.divider}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>VEYA</Text>
+                <Text style={styles.dividerText}>OR</Text>
                 <View style={styles.dividerLine} />
               </View>
 
@@ -170,8 +181,8 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                 onPress={() => navigation.navigate('Login')}
               >
                 <Text style={styles.loginText}>
-                  Zaten hesabınız var mı?{' '}
-                  <Text style={styles.loginTextBold}>Giriş Yapın</Text>
+                  Already have an account?{' '}
+                  <Text style={styles.loginTextBold}>Sign In</Text>
                 </Text>
               </TouchableOpacity>
             </Card>

@@ -20,10 +20,10 @@ const ProfileScreen = () => {
   const { user, profile, logout } = useAuthStore();
 
   const handleLogout = () => {
-    Alert.alert('Çıkış Yap', 'Çıkış yapmak istediğinizden emin misiniz?', [
-      { text: 'İptal', style: 'cancel' },
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Çıkış Yap',
+        text: 'Logout',
         style: 'destructive',
         onPress: async () => {
           await logout();
@@ -32,70 +32,208 @@ const ProfileScreen = () => {
     ]);
   };
 
-  const profileItems = [
-    { icon: 'mail', label: 'E-posta', value: user?.email },
-    { icon: 'location', label: 'Hedef Ülke', value: profile?.destinationCountry?.name || '-' },
-    { icon: 'location-outline', label: 'Hedef Şehir', value: profile?.destinationCity || '-' },
-    { icon: 'school', label: 'Üniversite', value: profile?.homeUniversity || '-' },
-  ];
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <LinearGradient colors={['#f0f9ff', '#ffffff', '#faf5ff']} style={styles.gradient}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Profile Header */}
-          <Card style={styles.headerCard}>
-            <View style={styles.avatarContainer}>
-              <Text style={styles.avatarText}>
-                {profile?.firstName?.[0] || 'U'}{profile?.lastName?.[0] || ''}
-              </Text>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>My Profile</Text>
+            <TouchableOpacity style={styles.editButton}>
+              <Ionicons name="create-outline" size={24} color={colors.primary[600]} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Profile Card */}
+          <Card style={styles.profileCard}>
+            <View style={styles.profileHeader}>
+              <View style={styles.avatarLarge}>
+                <Text style={styles.avatarText}>
+                  {profile?.firstName?.[0] || 'U'}{profile?.lastName?.[0] || ''}
+                </Text>
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={styles.userName}>
+                  {profile?.firstName} {profile?.lastName}
+                </Text>
+                <Text style={styles.userLocation}>
+                  {profile?.destinationCity}, {profile?.destinationCountry?.name}
+                </Text>
+              </View>
             </View>
-            <Text style={styles.userName}>
-              {profile?.firstName} {profile?.lastName}
-            </Text>
+
             {profile?.bio && (
-              <Text style={styles.bio}>{profile.bio}</Text>
+              <View style={styles.bioContainer}>
+                <Text style={styles.bio}>{profile.bio}</Text>
+              </View>
             )}
           </Card>
 
-          {/* Profile Info */}
+          {/* Contact Information */}
           <Card style={styles.card}>
-            <Text style={styles.sectionTitle}>Profil Bilgileri</Text>
-            {profileItems.map((item, index) => (
-              <View key={index} style={styles.infoItem}>
-                <View style={styles.infoIcon}>
-                  <Ionicons name={item.icon as any} size={20} color={colors.primary[600]} />
-                </View>
+            <View style={styles.cardHeader}>
+              <Ionicons name="person" size={20} color={colors.primary[600]} />
+              <Text style={styles.sectionTitle}>Contact Information</Text>
+            </View>
+            <View style={styles.infoList}>
+              <View style={styles.infoItem}>
+                <Ionicons name="mail" size={18} color={colors.gray[500]} />
                 <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>{item.label}</Text>
-                  <Text style={styles.infoValue}>{item.value || '-'}</Text>
+                  <Text style={styles.infoLabel}>Email</Text>
+                  <Text style={styles.infoValue}>{user?.email}</Text>
                 </View>
               </View>
-            ))}
+              {profile?.phone && (
+                <View style={styles.infoItem}>
+                  <Ionicons name="call" size={18} color={colors.gray[500]} />
+                  <View style={styles.infoContent}>
+                    <Text style={styles.infoLabel}>Phone</Text>
+                    <Text style={styles.infoValue}>
+                      {profile.phoneCountryCode} {profile.phone}
+                    </Text>
+                  </View>
+                </View>
+              )}
+              {profile?.gender && (
+                <View style={styles.infoItem}>
+                  <Ionicons name="person" size={18} color={colors.gray[500]} />
+                  <View style={styles.infoContent}>
+                    <Text style={styles.infoLabel}>Gender</Text>
+                    <Text style={styles.infoValue}>{profile.gender}</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          </Card>
+
+          {/* Erasmus Information */}
+          <Card style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Ionicons name="globe" size={20} color={colors.primary[600]} />
+              <Text style={styles.sectionTitle}>Erasmus Information</Text>
+            </View>
+            <View style={styles.infoList}>
+              <View style={styles.infoItem}>
+                <Ionicons name="location" size={18} color={colors.gray[500]} />
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>Destination</Text>
+                  <Text style={styles.infoValue}>
+                    {profile?.destinationCity}, {profile?.destinationCountry?.name}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.infoItem}>
+                <Ionicons name="calendar" size={18} color={colors.gray[500]} />
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>Academic Term</Text>
+                  <Text style={styles.infoValue}>
+                    {profile?.academicTerm} {profile?.academicYear}
+                  </Text>
+                </View>
+              </View>
+              {profile?.hasReturnedFromErasmus && (
+                <View style={styles.statusBadge}>
+                  <Text style={styles.statusText}>✓ Experienced - Can provide mentorship</Text>
+                </View>
+              )}
+            </View>
+          </Card>
+
+          {/* University Information */}
+          <Card style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Ionicons name="school" size={20} color={colors.primary[600]} />
+              <Text style={styles.sectionTitle}>University</Text>
+            </View>
+            <View style={styles.infoList}>
+              <View style={styles.infoItem}>
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>Home University</Text>
+                  <Text style={styles.infoValue}>{profile?.homeUniversity || 'Not specified'}</Text>
+                </View>
+              </View>
+              <View style={styles.infoItem}>
+                <View style={styles.infoContent}>
+                  <Text style={styles.infoLabel}>Host University</Text>
+                  <Text style={styles.infoValue}>{profile?.destinationUniversity || 'Not specified'}</Text>
+                </View>
+              </View>
+              {profile?.fieldOfStudy && (
+                <View style={styles.infoItem}>
+                  <View style={styles.infoContent}>
+                    <Text style={styles.infoLabel}>Field of Study</Text>
+                    <Text style={styles.infoValue}>{profile.fieldOfStudy}</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          </Card>
+
+          {/* Interests & Languages */}
+          <Card style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Ionicons name="heart" size={20} color={colors.primary[600]} />
+              <Text style={styles.sectionTitle}>Interests & Languages</Text>
+            </View>
+            <View style={styles.infoList}>
+              <View style={styles.tagSection}>
+                <Text style={styles.tagTitle}>Interests</Text>
+                <View style={styles.tagList}>
+                  {profile?.interests && profile.interests.length > 0 ? (
+                    profile.interests.map((interest: string, idx: number) => (
+                      <View key={idx} style={styles.tag}>
+                        <Text style={styles.tagText}>{interest}</Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyText}>No interests added</Text>
+                  )}
+                </View>
+              </View>
+              <View style={styles.tagSection}>
+                <Text style={styles.tagTitle}>Languages</Text>
+                <View style={styles.tagList}>
+                  {profile?.languages && profile.languages.length > 0 ? (
+                    profile.languages.map((lang: string, idx: number) => (
+                      <View key={idx} style={[styles.tag, styles.languageTag]}>
+                        <Text style={[styles.tagText, styles.languageTagText]}>{lang.toUpperCase()}</Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyText}>No languages added</Text>
+                  )}
+                </View>
+              </View>
+              {profile?.lookingForRoommate && (
+                <View style={styles.roommateBadge}>
+                  <Text style={styles.roommateText}>🏠 Looking for a roommate</Text>
+                </View>
+              )}
+            </View>
           </Card>
 
           {/* Actions */}
           <Card style={styles.card}>
             <TouchableOpacity style={styles.actionItem}>
-              <Ionicons name="settings" size={24} color={colors.gray[700]} />
-              <Text style={styles.actionText}>Ayarlar</Text>
+              <Ionicons name="settings-outline" size={24} color={colors.gray[700]} />
+              <Text style={styles.actionText}>Settings</Text>
               <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionItem}>
-              <Ionicons name="help-circle" size={24} color={colors.gray[700]} />
-              <Text style={styles.actionText}>Yardım</Text>
+              <Ionicons name="help-circle-outline" size={24} color={colors.gray[700]} />
+              <Text style={styles.actionText}>Help</Text>
               <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionItem}>
-              <Ionicons name="information-circle" size={24} color={colors.gray[700]} />
-              <Text style={styles.actionText}>Hakkında</Text>
+              <Ionicons name="information-circle-outline" size={24} color={colors.gray[700]} />
+              <Text style={styles.actionText}>About</Text>
               <Ionicons name="chevron-forward" size={20} color={colors.gray[400]} />
             </TouchableOpacity>
           </Card>
 
           {/* Logout Button */}
           <Button
-            title="Çıkış Yap"
+            title="Logout"
             onPress={handleLogout}
             variant="outline"
             style={styles.logoutButton}
@@ -117,60 +255,99 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: spacing.lg,
   },
-  headerCard: {
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing.lg,
   },
-  avatarContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  title: {
+    fontSize: fontSize['3xl'],
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  editButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  profileCard: {
+    marginBottom: spacing.lg,
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  avatarLarge: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: colors.primary[200],
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.md,
+    marginRight: spacing.md,
   },
   avatarText: {
     fontSize: fontSize['3xl'],
     fontWeight: 'bold',
     color: colors.primary[700],
   },
+  profileInfo: {
+    flex: 1,
+  },
   userName: {
-    fontSize: fontSize['2xl'],
+    fontSize: fontSize.xl,
     fontWeight: 'bold',
     color: colors.text,
     marginBottom: spacing.xs,
   },
-  bio: {
+  userLocation: {
     fontSize: fontSize.sm,
     color: colors.textSecondary,
-    textAlign: 'center',
+  },
+  bioContainer: {
+    backgroundColor: colors.primary[50],
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary[500],
+  },
+  bio: {
+    fontSize: fontSize.sm,
+    color: colors.text,
     fontStyle: 'italic',
+    lineHeight: fontSize.sm * 1.5,
   },
   card: {
     marginBottom: spacing.lg,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.md,
   },
   sectionTitle: {
     fontSize: fontSize.lg,
     fontWeight: 'bold',
     color: colors.text,
-    marginBottom: spacing.md,
+  },
+  infoList: {
+    gap: spacing.md,
   },
   infoItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  infoIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primary[50],
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
+    alignItems: 'flex-start',
+    gap: spacing.sm,
   },
   infoContent: {
     flex: 1,
@@ -181,28 +358,86 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   infoValue: {
-    fontSize: fontSize.base,
-    fontWeight: '600',
+    fontSize: fontSize.sm,
+    fontWeight: '500',
     color: colors.text,
+  },
+  statusBadge: {
+    backgroundColor: colors.success[50],
+    padding: spacing.sm,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.success[200],
+  },
+  statusText: {
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+    color: colors.success[700],
+  },
+  tagSection: {
+    gap: spacing.sm,
+  },
+  tagTitle: {
+    fontSize: fontSize.xs,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+  },
+  tagList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  tag: {
+    backgroundColor: colors.primary[100],
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+  },
+  tagText: {
+    fontSize: fontSize.xs,
+    fontWeight: '600',
+    color: colors.primary[700],
+  },
+  languageTag: {
+    backgroundColor: colors.secondary[100],
+  },
+  languageTagText: {
+    color: colors.secondary[700],
+  },
+  emptyText: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
+  },
+  roommateBadge: {
+    backgroundColor: colors.warning[50],
+    padding: spacing.sm,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.warning[200],
+  },
+  roommateText: {
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+    color: colors.warning[700],
   },
   actionItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: spacing.md,
+    gap: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.gray[200],
   },
   actionText: {
     flex: 1,
     fontSize: fontSize.base,
-    fontWeight: '600',
     color: colors.text,
-    marginLeft: spacing.md,
   },
   logoutButton: {
-    marginBottom: spacing.xl,
+    marginBottom: spacing.xxl,
   },
 });
 
 export default ProfileScreen;
-
